@@ -25,7 +25,7 @@ module OmniAuth
 
           deflated_request  = Zlib::Deflate.deflate(request, 9)[2..-5]
           base64_request    = Base64.encode64(deflated_request)
-          encoded_request   = CGI.escape(base64_request)
+          encoded_request   = base64_request # CGI.escape(base64_request)
           request_params    = "?SAMLRequest=" + encoded_request
 
           params.each_pair do |key, value|
