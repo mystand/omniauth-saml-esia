@@ -20,6 +20,9 @@ module OmniAuth
             "<saml:AuthnContextClassRef xmlns:saml=\"urn:oasis:names:tc:SAML:2.0:assertion\">urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport</saml:AuthnContextClassRef></samlp:RequestedAuthnContext>\n" +
             "</samlp:AuthnRequest>"
 
+          params[:Signature] = sign_xml(request, settings[:pkey_path])
+          params[:SigAlg]    = "http://www.w3.org/2000/09/xmldsig#rsa-sha1"
+
           deflated_request  = Zlib::Deflate.deflate(request, 9)[2..-5]
           base64_request    = Base64.encode64(deflated_request)
           encoded_request   = CGI.escape(base64_request)
@@ -30,6 +33,11 @@ module OmniAuth
           end
 
           settings[:idp_sso_target_url] + request_params
+        end
+
+        def sign_xml xml, key_path
+          privkey = OpenSSL::PKey::RSA.new(File.read(key_path))
+          Base64.encode64(privkey.sign(OpenSSL::Digest::SHA1.new, xml))
         end
 
       end
