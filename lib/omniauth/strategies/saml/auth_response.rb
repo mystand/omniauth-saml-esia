@@ -1,4 +1,6 @@
 require "time"
+require "omniauth"
+require "ruby-saml"
 
 module OmniAuth
   module Strategies
@@ -15,6 +17,22 @@ module OmniAuth
           raise ArgumentError.new("Response cannot be nil") if response.nil?
           self.options  = options
           self.response = response
+          
+          
+          
+          r          = OneLogin::RubySaml::Response.new(response)
+          r.settings = OpenStruct.new(options)
+          pp r.settings.to_h
+          puts '------'
+          puts r.name_id
+          puts '========='
+          puts r.attributes
+          puts '|||||||||'
+          puts r.is_valid?
+          puts '000000000'
+          
+          
+          
           self.document = OmniAuth::Strategies::SAML::XMLSecurity::SignedDocument.new(Base64.decode64(response))
         end
 
