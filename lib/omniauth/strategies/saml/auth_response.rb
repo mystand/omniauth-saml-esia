@@ -1,6 +1,7 @@
 require "time"
 require "omniauth"
 require "ruby-saml"
+require 'rsa_ext'
 
 module OmniAuth
   module Strategies
@@ -18,72 +19,90 @@ module OmniAuth
           self.options  = options
           self.response = response
           
+          puts "----1:#{options[:pkey_path]}"
+          key = OpenSSL::PKey::RSA.new(File.read(options[:pkey_path]))
+          puts "----2:#{key}"
+          #string = key.private_decrypt(Base64.decode64(response))
+          @doc = Nokogiri::XML(Base64.decode64(response))
+          @doc.remove_namespaces!
           
+          cert1 = OpenSSL::X509::Certificate.new(Base64.decode64(@doc.css('X509Certificate')[0].text))
+          cert2 = OpenSSL::X509::Certificate.new(Base64.decode64(@doc.css('X509Certificate')[1].text))
+
+          puts "----3 check key: #{cert2.check_private_key(key)}"
           
-          r          = OneLogin::RubySaml::Response.new(response)
-          r.settings = OpenStruct.new(options)
-          pp r.settings.to_h
-          puts '------'
-          puts r.name_id
-          puts '========='
-          puts r.attributes
-          puts '|||||||||'
-          puts r.is_valid?
-          puts '000000000'
+          enc1 = Base64.decode64(@doc.css('CipherValue')[0].text)
+          enc2 = Base64.decode64(@doc.css('CipherValue')[1].text)
           
+          puts "----4 cipherkey key encrypted: #{enc1}"
           
+          # Generate the key used for the cipher below via the RSA::OAEP algo
+          rsak      = RSA::Key.new key.n, key.d
           
-          self.document = OmniAuth::Strategies::SAML::XMLSecurity::SignedDocument.new(Base64.decode64(response))
+          puts "NEW RSA KEY:#{rsak}"
+      
+          cipherkey = RSA::OAEP.decode rsak, enc1
+          
+          puts "----5 cipherkey key DECRYPTED: #{cipherkey}" 
+          
+          bytes  = enc2.bytes.to_a
+          iv     = bytes[0...16].pack('c*')
+          others = bytes[16..-1].pack('c*')
+          
+          cipher = OpenSSL::Cipher.new('AES-128-CBC')
+          cipher.decrypt
+          cipher.iv  = iv
+          cipher.key = cipherkey
+
+          @out = cipher.update(others)          
+          
+          puts "----6 succesfuly decoded" 
+          
+          self.document = Nokogiri::XML(@out)
+          self.document.remove_namespaces!
         end
 
-        def valid?
-          validate(soft = true)
-        end
+        #def valid?
+          #validate(soft = true)
+        #end
 
-        def validate!
-          validate(soft = false)
-        end
+        #def validate!
+        #  validate(soft = false)
+        #end
 
         # The value of the user identifier as designated by the initialization request response
         def name_id
-          @name_id ||= begin
-            node = xpath("/p:Response/a:Assertion[@ID='#{signed_element_id}']/a:Subject/a:NameID")
-            node ||=  xpath("/p:Response[@ID='#{signed_element_id}']/a:Assertion/a:Subject/a:NameID")
-            node.nil? ? nil : strip(node.text)
-          end
+          @name_id ||= self.document.css('NameID').first.text
         end
 
         # A hash of all the attributes with the response. Assuming there is only one value for each key
         def attributes
           @attr_statements ||= begin
-            stmt_element = xpath("/p:Response/a:Assertion/a:AttributeStatement")
-            return {} if stmt_element.nil?
-
-            {}.tap do |result|
-              stmt_element.elements.each do |attr_element|
-                name  = attr_element.attributes["Name"]
-                value = strip(attr_element.elements.first.text)
-
-                result[name] = result[name.to_sym] =  value
+            hash = {}
+            self.document.css('AttributeStatement').children.each do |c|
+              begin
+                hash[c.attributes['FriendlyName'].value.strip.to_sym] = c.text.strip
+              rescue
               end
             end
+            hash
           end
         end
 
         # When this user session should expire at latest
-        def session_expires_at
-          @expires_at ||= begin
-            node = xpath("/p:Response/a:Assertion/a:AuthnStatement")
-            parse_time(node, "SessionNotOnOrAfter")
-          end
-        end
+        #def session_expires_at
+        #  @expires_at ||= begin
+        #    node = xpath("/p:Response/a:Assertion/a:AuthnStatement")
+        #    parse_time(node, "SessionNotOnOrAfter")
+        #  end
+        #end
 
         # Conditions (if any) for the assertion to run
-        def conditions
-          @conditions ||= begin
-            xpath("/p:Response/a:Assertion[@ID='#{signed_element_id}']/a:Conditions")
-          end
-        end
+        #def conditions
+        #  @conditions ||= begin
+        #    xpath("/p:Response/a:Assertion[@ID='#{signed_element_id}']/a:Conditions")
+        #  end
+        #end
 
         private
 
