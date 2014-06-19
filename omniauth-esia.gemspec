@@ -1,7 +1,7 @@
 require File.expand_path('../lib/omniauth-esia/version', __FILE__)
 
 Gem::Specification.new do |gem|
-  gem.name          = "omniauth-saml-esia"
+  gem.name          = "omniauth-esia"
   gem.version       = OmniAuth::ESIA::VERSION
   gem.summary       = %q{A generic ESIA strategy for OmniAuth.}
   gem.description   = %q{A generic ESIA strategy for OmniAuth.}
