@@ -4,10 +4,10 @@ module OmniAuth
   module Strategies
     class ESIA
       include OmniAuth::Strategy
-      autoload :AuthRequest,      'omniauth/strategies/saml/auth_request'
-      autoload :AuthResponse,     'omniauth/strategies/saml/auth_response'
-      autoload :ValidationError,  'omniauth/strategies/saml/validation_error'
-      autoload :XMLSecurity,      'omniauth/strategies/saml/xml_security'
+      autoload :AuthRequest,      'omniauth/strategies/esia/auth_request'
+      autoload :AuthResponse,     'omniauth/strategies/esia/auth_response'
+      autoload :ValidationError,  'omniauth/strategies/esia/validation_error'
+      autoload :XMLSecurity,      'omniauth/strategies/esia/xml_security'
 
       option :name_identifier_format, "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
 
