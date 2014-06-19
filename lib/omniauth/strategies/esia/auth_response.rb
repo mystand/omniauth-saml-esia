@@ -5,7 +5,7 @@ require 'rsa_ext'
 
 module OmniAuth
   module Strategies
-    class SAML
+    class ESIA
       class AuthResponse
 
         ASSERTION = "urn:oasis:names:tc:SAML:2.0:assertion"
@@ -107,7 +107,7 @@ module OmniAuth
         private
 
         def validation_error(message)
-          raise OmniAuth::Strategies::SAML::ValidationError.new(message)
+          raise OmniAuth::Strategies::ESIA::ValidationError.new(message)
         end
 
         def validate(soft = true)

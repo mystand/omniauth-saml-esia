@@ -14,7 +14,7 @@ end
 
 module OmniAuth
   module Strategies
-    class SAML
+    class ESIA
       class AuthRequest
 
         def create(settings, params = {})

@@ -1,6 +1,6 @@
 module OmniAuth
   module Strategies
-    class SAML
+    class ESIA
       class ValidationError < Exception
       end
     end

@@ -2,7 +2,7 @@ require 'omniauth'
 
 module OmniAuth
   module Strategies
-    class SAML
+    class ESIA
       include OmniAuth::Strategy
       autoload :AuthRequest,      'omniauth/strategies/saml/auth_request'
       autoload :AuthResponse,     'omniauth/strategies/saml/auth_response'
@@ -12,14 +12,14 @@ module OmniAuth
       option :name_identifier_format, "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
 
       def request_phase
-        request = OmniAuth::Strategies::SAML::AuthRequest.new
+        request = OmniAuth::Strategies::ESIA::AuthRequest.new
         redirect(request.create(options))
       end
 
       def callback_phase
         begin
           
-          response = OmniAuth::Strategies::SAML::AuthResponse.new(request.params['SAMLResponse'], options)
+          response = OmniAuth::Strategies::ESIA::AuthResponse.new(request.params['SAMLResponse'], options)
           response.settings = options
 
           @name_id  = response.name_id
@@ -54,3 +54,4 @@ module OmniAuth
 end
 
 OmniAuth.config.add_camelization 'saml', 'SAML'
+OmniAuth.config.add_camelization 'esia', 'ESIA'

@@ -31,7 +31,7 @@ require "digest/sha1"
 
 module OmniAuth
   module Strategies
-    class SAML
+    class ESIA
 
       module XMLSecurity
 
@@ -55,7 +55,7 @@ module OmniAuth
             fingerprint = Digest::SHA1.hexdigest(cert.to_der)
 
             if fingerprint != idp_cert_fingerprint.gsub(/[^a-zA-Z0-9]/,"").downcase
-              return soft ? false : (raise OmniAuth::Strategies::SAML::ValidationError.new("Fingerprint mismatch"))
+              return soft ? false : (raise OmniAuth::Strategies::ESIA::ValidationError.new("Fingerprint mismatch"))
             end
 
             validate_doc(base64_cert, soft)
@@ -89,7 +89,7 @@ module OmniAuth
               digest_value                  = REXML::XPath.first(ref, "//ds:DigestValue", {"ds"=>"http://www.w3.org/2000/09/xmldsig#"}).text
 
               if hash != digest_value
-                return soft ? false : (raise OmniAuth::Strategies::SAML::ValidationError.new("Digest mismatch"))
+                return soft ? false : (raise OmniAuth::Strategies::ESIA::ValidationError.new("Digest mismatch"))
               end
             end
 
@@ -106,7 +106,7 @@ module OmniAuth
             cert                    = OpenSSL::X509::Certificate.new(cert_text)
 
             if !cert.public_key.verify(OpenSSL::Digest::SHA1.new, signature, canon_string)
-              return soft ? false : (raise OmniAuth::Strategies::SAML::ValidationError.new("Key validation error"))
+              return soft ? false : (raise OmniAuth::Strategies::ESIA::ValidationError.new("Key validation error"))
             end
 
             return true

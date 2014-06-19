@@ -1,14 +1,14 @@
-require File.expand_path('../lib/omniauth-saml/version', __FILE__)
+require File.expand_path('../lib/omniauth-esia/version', __FILE__)
 
 Gem::Specification.new do |gem|
-  gem.name          = "omniauth-saml"
-  gem.version       = OmniAuth::SAML::VERSION
-  gem.summary       = %q{A generic SAML strategy for OmniAuth.}
-  gem.description   = %q{A generic SAML strategy for OmniAuth.}
+  gem.name          = "omniauth-saml-esia"
+  gem.version       = OmniAuth::ESIA::VERSION
+  gem.summary       = %q{A generic ESIA strategy for OmniAuth.}
+  gem.description   = %q{A generic ESIA strategy for OmniAuth.}
 
-  gem.authors       = ["Raecoo Cao", "Ryan Wilcox", "Rajiv Aaron Manglani", "Steven Anderson"]
-  gem.email         = "rajiv@alum.mit.edu"
-  gem.homepage      = "https://github.com/PracticallyGreen/omniauth-saml"
+  gem.authors       = ["Samoilenko Yuri"]
+  gem.email         = "kinnalru@gmail.com"
+  gem.homepage      = "https://github.com/kinnalru/omniauth-saml-esia"
 
   gem.add_runtime_dependency 'omniauth', '~> 1.0'
   gem.add_runtime_dependency 'xmlcanonicalizer', '0.1.1'
@@ -21,6 +21,5 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'rack-test', '0.6.1'
 
   gem.files         = ['README.md'] + Dir['lib/**/*.rb']
-  gem.test_files    = Dir['spec/**/*.rb']
   gem.require_paths = ["lib"]
 end
