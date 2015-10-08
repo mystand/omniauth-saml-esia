@@ -19,7 +19,6 @@ module OmniAuth
         def create(settings, params = {})
           uuid = '_' + UUID.new.generate
           time = Time.now.utc.strftime('%Y-%m-%dT%H:%M:%S.%LZ')
-
           request = <<-REQUEST
 <?xml version="1.0" encoding="UTF-8"?>
 <saml2p:AuthnRequest xmlns:saml2p="urn:oasis:names:tc:SAML:2.0:protocol"
@@ -34,7 +33,6 @@ Version="2.0">
 <saml2:Issuer xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion">#{settings[:issuer]}</saml2:Issuer>
 </saml2p:AuthnRequest>"
 REQUEST
-
           ssl = Ssl::SslGem.new
           ssl_opts = { engine: '', dgst: 'sha1', dgst_arg: '' }
 
