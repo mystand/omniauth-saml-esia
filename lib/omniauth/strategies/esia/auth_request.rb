@@ -33,7 +33,7 @@ ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
 Version="2.0">
 <saml2:Issuer xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion">#{settings[:issuer]}</saml2:Issuer>
 </saml2p:AuthnRequest>"
-            REQUEST
+REQUEST
 
           ssl = Ssl::SslGem.new
           ssl_opts = { engine: '', dgst: 'sha1', dgst_arg: '' }
