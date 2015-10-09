@@ -18,47 +18,47 @@ module OmniAuth
           raise ArgumentError.new("Response cannot be nil") if response.nil?
           self.options  = options
           self.response = response
-          
+
           OmniAuth.logger.debug "----1:#{options[:pkey_path]}"
-          key = OpenSSL::PKey::RSA.new(File.read(options[:pkey_path]))
+          key = OpenSSL::PKey::RSA.new(open(options[:pkey_path], &:read))
           OmniAuth.logger.debug "----2:#{key}"
           #string = key.private_decrypt(Base64.decode64(response))
           @doc = Nokogiri::XML(Base64.decode64(response))
           @doc.remove_namespaces!
-          
+
           cert1 = OpenSSL::X509::Certificate.new(Base64.decode64(@doc.css('X509Certificate')[0].text))
           cert2 = OpenSSL::X509::Certificate.new(Base64.decode64(@doc.css('X509Certificate')[1].text))
 
           OmniAuth.logger.debug "----3 check key: #{cert2.check_private_key(key)}"
-          
+
           enc1 = Base64.decode64(@doc.css('CipherValue')[0].text)
           enc2 = Base64.decode64(@doc.css('CipherValue')[1].text)
-          
+
           OmniAuth.logger.debug "----4 cipherkey key encrypted: #{enc1}"
-          
+
           # Generate the key used for the cipher below via the RSA::OAEP algo
           rsak      = RSA::Key.new key.n, key.d
-          
+
           OmniAuth.logger.debug "NEW RSA KEY:#{rsak}"
-      
+
           cipherkey = RSA::OAEP.decode rsak, enc1
-          
-          OmniAuth.logger.debug "----5 cipherkey key DECRYPTED: #{cipherkey}" 
-          
+
+          OmniAuth.logger.debug "----5 cipherkey key DECRYPTED: #{cipherkey}"
+
           bytes  = enc2.bytes.to_a
           iv     = bytes[0...16].pack('c*')
           others = bytes[16..-1].pack('c*')
-          
+
           cipher = OpenSSL::Cipher.new('AES-128-CBC')
           cipher.decrypt
           cipher.iv  = iv
           cipher.key = cipherkey
 
-          @out = cipher.update(others)          
-          
-          OmniAuth.logger.debug "----6 succesfuly decoded" 
-          OmniAuth.logger.debug "----7 result doc #{@out}" 
-          
+          @out = cipher.update(others)
+
+          OmniAuth.logger.debug "----6 succesfuly decoded"
+          OmniAuth.logger.debug "----7 result doc #{@out}"
+
           self.document = Nokogiri::XML(@out)
           self.document.remove_namespaces!
         end

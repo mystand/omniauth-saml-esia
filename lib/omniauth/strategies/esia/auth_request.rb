@@ -40,7 +40,7 @@ REQUEST
 
           request = ssl.sign_xml(doc.search_child('AuthnRequest', NAMESPACES['saml2p']).first, settings[:pkey_path], ssl_opts)
           doc = Nokogiri::XML::Document.parse(request, nil, 'UTF-8')
-          doc.search_child('X509Certificate', NAMESPACES['ds']).first << File.read(settings[:idp_cert]).gsub(/\-{2,}[^\-]+\-{2,}/,'').gsub(/\n\n+/, "\n").strip
+          doc.search_child('X509Certificate', NAMESPACES['ds']).first << open(settings[:idp_cert], &:read).gsub(/\-{2,}[^\-]+\-{2,}/,'').gsub(/\n\n+/, "\n").strip
           request = doc.to_xml(save_with: Nokogiri::XML::Node::SaveOptions::AS_XML).sub("\n", '')
 
           ssl.verify_xml request, ssl_opts
@@ -58,10 +58,13 @@ REQUEST
         end
 
         def sign_xml(xml, key_path)
-          privkey = OpenSSL::PKey::RSA.new(File.read(key_path))
+          privkey = OpenSSL::PKey::RSA.new(open(key_path, &:read))
           Base64.encode64(privkey.sign(OpenSSL::Digest::SHA1.new, xml))
         end
       end
     end
   end
 end
+
+
+open(path_in_string, &:read)
