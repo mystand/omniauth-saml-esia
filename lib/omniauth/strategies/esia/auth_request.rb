@@ -65,6 +65,3 @@ REQUEST
     end
   end
 end
-
-
-open(path_in_string, &:read)
